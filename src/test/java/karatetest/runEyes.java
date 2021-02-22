@@ -4,16 +4,21 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import com.applitools.eyes.NullLogHandler;
 import com.applitools.eyes.RectangleSize;
 import com.applitools.eyes.images.Eyes;
+import com.intuit.karate.driver.DevToolsDriver;
 import com.intuit.karate.driver.chrome.Chrome;
+import com.sun.org.apache.bcel.internal.generic.RETURN;
 
 public class runEyes {
 
 	private Eyes eyes;
+	private DevToolsDriver driver;
 		
-	public runEyes()
+	public runEyes(DevToolsDriver driver)
 	{
+		this.driver=driver;
 		Init();
 	}
 	
@@ -21,24 +26,50 @@ public class runEyes {
 	{
 		eyes=new Eyes();
 		eyes.setApiKey("APPLITOOLS_API_KEY");
-		eyes.open("Karate Demo - Images SDK"," POCTest - ImagesSDK",new RectangleSize(1024, 784));
+		eyes.setHostApp(this.driver.getOptions().type);
 	}
 	
-//	public void check(byte[] bytes) {
-//		try {
-//			eyes.checkImage(ImageIO.read(new ByteArrayInputStream(bytes)));
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
+	public void open(String AppName,String TestName,int width,int height)
+	{
+		width = width==0 ? 1024: width;
+		height = height==0 ? 784: height;
+		
+		eyes.open(AppName,TestName,new RectangleSize(width, height));
+	}
 	
-	public void check(Chrome driver) {
+	
+	public boolean check(byte[] bytes, String Tag)
+	{
 		try {
-			eyes.checkImage(ImageIO.read(new ByteArrayInputStream(driver.screenshotFull())));
+			eyes.checkImage(ImageIO.read(new ByteArrayInputStream(bytes)),Tag);
+			return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	
+	public boolean check(byte[] bytes) {
+		return check(bytes,"");
+	}
+	
+	public boolean check()
+	{
+		return check("");
+	}
+	
+	
+	public boolean check(String Tag) {
+		try {
+			
+			eyes.checkImage(ImageIO.read(new ByteArrayInputStream(this.driver.screenshotFull())),Tag);
+			return true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
 		}
 	}
 	
